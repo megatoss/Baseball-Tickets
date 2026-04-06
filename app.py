@@ -191,7 +191,13 @@ def download_applications():
 @app.route("/applications/delete", methods=["POST"])
 def delete_application():
     app_id = int(request.form.get("application_id"))
-    applications[:] = [a for a in applications if a["id"] != app_id]
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM applications WHERE id = ?", (app_id,))
+    conn.commit()
+    conn.close()
+
     return redirect(url_for("applications_list"))
 
 @app.route("/dashboard")
