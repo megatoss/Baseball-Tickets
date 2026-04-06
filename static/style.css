@@ -166,3 +166,142 @@ table button {
     font-size: 12px;
     padding: 4px 10px;
 }
+
+/* 전체 기본 글자 크기 */
+body {
+    font-size: 15px;
+}
+/* 상단 네비게이션 */
+.navbar {
+    background-color: #b71c1c;
+    height: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* 네비 내부 정렬 */
+.navbar-inner {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 로고 */
+.logo {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* 메뉴 영역 */
+.nav-right a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 18px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.nav-right a:hover {
+    text-decoration: underline;
+}
+/* 메인 콘텐츠 박스 */
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 24px 28px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.nav-right a {
+    padding: 8px 16px;
+    background-color: #2f2f2f;
+    color: #ffffff;
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.nav-right a:hover {
+    background-color: #000000;
+}
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(40, 40, 40, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.popup-modal {
+    width: 420px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    overflow: hidden;
+}
+
+.popup-header {
+    background-color: #b71c1c;
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.popup-body {
+    padding: 18px;
+    background-color: #fafafa;
+    font-size: 14px;
+}
+
+.popup-body label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 600;
+}
+
+.popup-body input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.popup-footer {
+    padding: 12px 16px;
+    background-color: #f1f1f1;
+    text-align: right;
+}
+
+.popup-btn {
+    background-color: #b71c1c;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 18px;
+    cursor: pointer;
+}
+
+.popup-btn.gray {
+    background-color: #9e9e9e;
+}

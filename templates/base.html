@@ -7,15 +7,33 @@
 </head>
 <body>
 
-<header style="border-bottom: 10px solid #ccc; padding: 100px;">
-    <a href="/">메인</a> |
-    <a href="/admin">관리자</a> |
-    <a href="/apply">티켓 신청</a> |
-    <a href="/applications">신청 기록</a> |
-    <a href="/dashboard">신청 현황</a>
+<header class="navbar">
+    <div class="navbar-inner">
+        <div class="nav-left">
+            <span class="logo">⚾ LG트윈스 야구티켓 접수_LG화학.AX그룹 ⚾ </span>
+        </div>
+
+        <nav class="nav-right">
+            <a href="/" class="{% if request.path == '/' %}active{% endif %}">
+                신청 현황
+            </a>
+
+            <a href="/apply" class="{% if request.path.startswith('/apply') %}active{% endif %}">
+                티켓 신청
+            </a>
+
+            <a href="/applications" class="{% if request.path.startswith('/applications') %}active{% endif %}">
+                신청 기록
+            </a>
+
+            <a href="/admin" class="{% if request.path.startswith('/admin') %}active{% endif %}">
+                경기일자
+            </a>
+        </nav>
+    </div>
 </header>
 
-<main style="padding: 20px;">
+<main class="container">
     {% block content %}
     {% endblock %}
 </main>

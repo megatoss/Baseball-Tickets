@@ -1,26 +1,36 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h1>티켓 신청 페이지</h1>
 
-{% if error_message %}
-<div id="popup" style="border:1px solid #333; padding:20px; width:320px; margin-bottom:15px;">
-    <p>{{ error_message }}</p>
-    <button onclick="closePopup()">닫기</button>
+<h1>티켓 신청</h1>
+<p>
+    블루 1석, 레드 1석, 네이비 1석 신청 가능합니다.<br>
+    동일 날짜는 1회만 신청 가능합니다.
+</p>
+
+<!-- ===== 중복 신청 팝업 ===== -->
+<div id="duplicate-popup-overlay" class="popup-overlay" style="display:none;">
+    <div class="popup-modal">
+        <div class="popup-header">
+            <span>신청 불가</span>
+            <button class="popup-close" onclick="closeDuplicatePopup()">×</button>
+        </div>
+
+        <div class="popup-body">
+            <p><strong>{{ error_message }}</strong></p>
+        </div>
+
+        <div class="popup-footer">
+            <button class="popup-btn" onclick="closeDuplicatePopup()">확인</button>
+        </div>
+    </div>
 </div>
 
-<script>
-function closePopup() {
-    document.getElementById("popup").style.display = "none";
-}
-</script>
-{% endif %}
 
 {% if matches %}
-<table border="1" cellpadding="5">
+<table border="1" cellpadding="8" class="apply-table">
     <tr>
-        <th class="col-date">경기일자</th>
-        <th class="col-opponent">상대</th>
+        <th>경기일자</th>
+        <th>상대</th>
         <th class="col-blue">Blue</th>
         <th class="col-red">Red</th>
         <th class="col-navy">Navy</th>
@@ -33,40 +43,172 @@ function closePopup() {
 
         {% for seat in ["Blue", "Red", "Navy"] %}
         <td>
-            <form method="post" onsubmit="return openPopup(this);">
+            <form method="post"
+                  onsubmit="return openApplyPopup(this,'{{ match.date }}','{{ match.opponent }}','{{ seat }}');">
                 <input type="hidden" name="match_id" value="{{ match.id }}">
                 <input type="hidden" name="seat" value="{{ seat }}">
                 <input type="hidden" name="name">
                 <input type="hidden" name="organization">
-                <button type="submit" class="select">신청</button>
+                <button type="submit" class="select-btn">신청</button>
             </form>
         </td>
         {% endfor %}
     </tr>
     {% endfor %}
 </table>
-
-<script>
-function openPopup(form) {
-    const name = prompt("이름을 입력하세요");
-    if (!name || !name.trim()) {
-        return false;
-    }
-
-    const org = prompt("소속을 입력하세요");
-    if (!org || !org.trim()) {
-        return false;
-    }
-
-    form.querySelector('input[name="name"]').value = name.trim();
-    form.querySelector('input[name="organization"]').value = org.trim();
-
-    return true;
-}
-</script>
-
 {% else %}
 <p>등록된 경기가 없습니다.</p>
 {% endif %}
+
+<!-- ===== 신청 확인 팝업 ===== -->
+<div id="apply-popup-overlay" class="popup-overlay" style="display:none;">
+    <div class="popup-modal">
+        <div class="popup-header">
+            <span>티켓 신청</span>
+            <button class="popup-close" onclick="closeApplyPopup()">×</button>
+        </div>
+
+        <div class="popup-body">
+            <p id="apply-popup-info"></p>
+
+            <label>
+                이름
+                <input type="text" id="popup-name">
+            </label>
+
+            <label>
+                소속
+                <input type="text" id="popup-org" onkeydown="handleEnter(event)">
+            </label>
+        </div>
+
+        <div class="popup-footer">
+            <button type="button" class="popup-btn gray" onclick="closeApplyPopup()">취소</button>
+            <button type="button" class="popup-btn" onclick="submitApplyForm()">신청</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 신청 완료 팝업 ===== -->
+<div id="success-popup-overlay" class="popup-overlay" style="display:none;">
+    <div class="popup-modal">
+        <div class="popup-header">
+            <span>신청 완료</span>
+        </div>
+
+        <div class="popup-body">
+            <p><strong>신청이 완료되었습니다.</strong></p>
+        </div>
+
+        <div class="popup-footer">
+            <button class="popup-btn" onclick="closeSuccessPopup()">확인</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentForm = null;
+
+function openApplyPopup(form, date, opponent, seat) {
+    currentForm = form;
+    document.getElementById("apply-popup-info").innerHTML =
+        `${date} / ${opponent}<br><strong>${seat}</strong> 좌석을 신청합니다.`;
+    document.getElementById("popup-name").value = "";
+    document.getElementById("popup-org").value = "";
+    document.getElementById("apply-popup-overlay").style.display = "flex";
+    return false;
+}
+
+function closeApplyPopup() {
+    document.getElementById("apply-popup-overlay").style.display = "none";
+    currentForm = null;
+}
+
+function submitApplyForm() {
+    const name = document.getElementById("popup-name").value.trim();
+    const org = document.getElementById("popup-org").value.trim();
+
+    if (!name || !org) {
+        alert("이름과 소속을 모두 입력해 주세요.");
+        return;
+    }
+
+    currentForm.querySelector('input[name="name"]').value = name;
+    currentForm.querySelector('input[name="organization"]').value = org;
+    currentForm.submit();
+}
+
+/* ===== 신청 완료 팝업 ===== */
+function closeSuccessPopup() {
+    document.getElementById("success-popup-overlay").style.display = "none";
+    // URL ?success=1 제거
+    history.replaceState(null, "", location.pathname);
+}
+
+/* success 파라미터 감지 */
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "1") {
+        document.getElementById("success-popup-overlay").style.display = "flex";
+    }
+});
+</script>
+
+
+<script>
+function closeDuplicatePopup() {
+    document.getElementById("duplicate-popup-overlay").style.display = "none";
+}
+
+/* ✅ 중복 신청 에러 발생 시 자동 팝업 */
+document.addEventListener("DOMContentLoaded", () => {
+    {% if error_message %}
+    document.getElementById("duplicate-popup-overlay").style.display = "flex";
+    {% endif %}
+});
+</script>
+
+
+<script>
+function handleEnter(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();  // 기본 동작 막기
+        submitApplyForm();       // 신청 처리
+    }
+}
+</script>
+
+<script>
+// ✅ 신청 완료 팝업 - Enter 키로 닫기
+document.addEventListener("keydown", function (event) {
+    const successPopup = document.getElementById("success-popup-overlay");
+
+    if (
+        successPopup &&
+        successPopup.style.display === "flex" &&
+        event.key === "Enter"
+    ) {
+        event.preventDefault();
+        closeSuccessPopup();
+    }
+});
+</script>
+
+<script>
+// ✅ 중복 신청 팝업 - Enter 키로 닫기
+document.addEventListener("keydown", function (event) {
+    const duplicatePopup = document.getElementById("duplicate-popup-overlay");
+
+    if (
+        duplicatePopup &&
+        duplicatePopup.style.display === "flex" &&
+        event.key === "Enter"
+    ) {
+        event.preventDefault();
+        closeDuplicatePopup();
+    }
+});
+</script>
+
 
 {% endblock %}

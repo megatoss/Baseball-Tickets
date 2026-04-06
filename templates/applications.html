@@ -1,35 +1,37 @@
 {% extends "base.html" %}
 
+{% block content %}
+
 {% if match_id %}
 <p>
-    <a href="/applications">전체 신청 보기</a>
+    <a href="/applications">← 전체 신청 보기</a>
 </p>
 {% endif %}
 
-{% block content %}
 <h1>신청 기록</h1>
 
 <div style="text-align: right; margin-bottom: 10px;">
     <a href="/applications/download">
-        <button class="select">CSV 다운로드</button>
+        <button class="select-btn">CSV 다운로드</button>
     </a>
 </div>
 
-
 {% if applications %}
-<table border="1" cellpadding="5">
+<table border="1" cellpadding="8" class="applications-table">
     <tr>
         <th class="col-gray">경기일자</th>
         <th class="col-gray">상대</th>
         <th class="col-gray">좌석</th>
         <th class="col-gray">이름</th>
         <th class="col-gray">소속</th>
-        <th class="col-gray">관리</t
+        <th class="col-gray">관리</th>
     </tr>
+
     {% for app in applications %}
     <tr>
         <td>{{ app.date }}</td>
         <td>{{ app.opponent }}</td>
+
         <td class="
             {% if app.seat == 'Blue' %}seat-blue
             {% elif app.seat == 'Red' %}seat-red
@@ -38,13 +40,14 @@
         ">
             {{ app.seat }}
         </td>
+
         <td>{{ app.name }}</td>
         <td>{{ app.organization }}</td>
         <td>
-            <form method="post" action="/applications/delete" onsubmit="return checkCancelPassword();">
-                <input type="hidden" name="application_id" value="{{ app.id }}">
-                <button type="submit" class="danger">취소</button>
-            </form>
+            <button class="danger"
+                    onclick="openCancelPopup('{{ app.id }}')">
+                취소
+            </button>
         </td>
     </tr>
     {% endfor %}
@@ -53,19 +56,101 @@
 <p>신청 기록이 없습니다.</p>
 {% endif %}
 
+<!-- ===== 취소 확인 팝업 ===== -->
+<div id="cancel-popup-overlay" class="popup-overlay" style="display:none;">
+    <div class="popup-modal">
+        <div class="popup-header">
+            <span>신청 취소</span>
+            <button class="popup-close" onclick="closeCancelPopup()">×</button>
+        </div>
 
+        <div class="popup-body">
+            <p><strong>취소 비밀번호를 입력하세요.</strong></p>
+
+            <input type="password"
+                   id="cancel-password"
+                   placeholder="비밀번호 입력"
+                   onkeydown="handleCancelEnter(event)">
+        </div>
+
+        <div class="popup-footer">
+            <button class="popup-btn gray" onclick="closeCancelPopup()">취소</button>
+            <button class="popup-btn" onclick="submitCancel()">확인</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 취소 완료 팝업 ===== -->
+<div id="cancel-success-popup" class="popup-overlay" style="display:none;">
+    <div class="popup-modal">
+        <div class="popup-header">
+            <span>취소 완료</span>
+        </div>
+
+        <div class="popup-body">
+            <p><strong>신청이 취소되었습니다.</strong></p>
+        </div>
+
+        <div class="popup-footer">
+            <button class="popup-btn" onclick="closeCancelSuccess()">확인</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 실제 서버 취소 요청 form (✅ hidden 확장) ===== -->
+<form id="cancel-form" method="post" action="/applications/delete">
+    <input type="hidden" name="application_id" id="cancel-application-id">
+    <input type="hidden" name="cancel_password" id="cancel-password-hidden">
+</form>
 
 <script>
-function checkCancelPassword() {
-    const pw = prompt("취소 비밀번호를 입력하세요");
-    if (pw !== "1233") {
-        alert("비밀번호가 올바르지 않습니다.");
-        return false;
-    }
-    return true;
+let cancelTargetId = null;
+
+function openCancelPopup(appId) {
+    cancelTargetId = appId;
+    document.getElementById("cancel-password").value = "";
+    document.getElementById("cancel-popup-overlay").style.display = "flex";
+    document.getElementById("cancel-password").focus(); // ✅ 포커스 추가
 }
+
+function closeCancelPopup() {
+    document.getElementById("cancel-popup-overlay").style.display = "none";
+    cancelTargetId = null;
+}
+
+function submitCancel() {
+    const pw = document.getElementById("cancel-password").value.trim();
+
+    if (!pw) {
+        alert("비밀번호를 입력하세요.");
+        return;
+    }
+
+    document.getElementById("cancel-application-id").value = cancelTargetId;
+    document.getElementById("cancel-password-hidden").value = pw;
+    document.getElementById("cancel-form").submit();
+}
+
+/* ✅ Enter 키로 취소 실행 */
+function handleCancelEnter(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        submitCancel();
+    }
+}
+
+function closeCancelSuccess() {
+    document.getElementById("cancel-success-popup").style.display = "none";
+    history.replaceState(null, "", location.pathname);
+}
+
+/* ✅ 취소 완료 시 자동 팝업 표시 */
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("canceled") === "1") {
+        document.getElementById("cancel-success-popup").style.display = "flex";
+    }
+});
 </script>
-
-
 
 {% endblock %}

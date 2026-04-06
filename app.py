@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+        return dashboard()
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
@@ -111,7 +111,7 @@ def apply():
 
                 conn.commit()
                 conn.close()
-                return redirect(url_for("applications_list"))
+                return redirect(url_for("apply", success = 1))
 
     # ✅ GET 요청: 경기 목록 조회
     conn = get_db()
@@ -198,9 +198,9 @@ def delete_application():
     conn.commit()
     conn.close()
 
-    return redirect(url_for("applications_list"))
+    return redirect(url_for("apply", canceled = 1))
 
-@app.route("/dashboard")
+# ✅ Main 과 dashboard(신청현황) 통합
 def dashboard():
     conn = get_db()
     cur = conn.cursor()
@@ -225,5 +225,6 @@ def dashboard():
     return render_template("dashboard.html", dashboard_data=rows)
 
 
+# ✅ 로컬 개발용 실행 진입점
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
