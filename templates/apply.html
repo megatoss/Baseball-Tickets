@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>티켓 신청 페이지</h1>
+
+{% if error_message %}
+<div id="popup" style="border:1px solid #333; padding:20px; width:320px; margin-bottom:15px;">
+    <p>{{ error_message }}</p>
+    <button onclick="closePopup()">닫기</button>
+</div>
+
+<script>
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
+}
+</script>
+{% endif %}
+
+{% if matches %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th class="col-date">경기일자</th>
+        <th class="col-opponent">상대</th>
+        <th class="col-blue">Blue</th>
+        <th class="col-red">Red</th>
+        <th class="col-navy">Navy</th>
+    </tr>
+
+    {% for match in matches %}
+    <tr>
+        <td>{{ match.date }}</td>
+        <td>{{ match.opponent }}</td>
+
+        {% for seat in ["Blue", "Red", "Navy"] %}
+        <td>
+            <form method="post" onsubmit="return openPopup(this);">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="seat" value="{{ seat }}">
+                <input type="hidden" name="name">
+                <input type="hidden" name="organization">
+                <button type="submit" class="select">신청</button>
+            </form>
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
+<script>
+function openPopup(form) {
+    const name = prompt("이름을 입력하세요");
+    if (!name || !name.trim()) {
+        return false;
+    }
+
+    const org = prompt("소속을 입력하세요");
+    if (!org || !org.trim()) {
+        return false;
+    }
+
+    form.querySelector('input[name="name"]').value = name.trim();
+    form.querySelector('input[name="organization"]').value = org.trim();
+
+    return true;
+}
+</script>
+
+{% else %}
+<p>등록된 경기가 없습니다.</p>
+{% endif %}
+
+{% endblock %}

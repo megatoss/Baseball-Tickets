@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>관리자 페이지</h1>
+
+<h2>경기일자 등록</h2>
+
+<form method="post" onsubmit="return checkAdminPassword();">
+    <input type="hidden" name="action" value="add">
+
+    <label>경기일자:</label>
+    <input type="date" name="match_date" required>
+
+    <br><br>
+
+    <label>상대팀:</label>
+    <input type="text" name="opponent" required>
+
+    <br><br>
+
+    <button type="submit">등록</button>
+</form>
+
+<hr>
+
+<h2>등록된 경기 목록</h2>
+
+{% if matches %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th>경기일자</th>
+        <th>상대팀</th>
+        <th>관리</th>
+    </tr>
+    {% for match in matches %}
+    <tr>
+        <td>{{ match.date }}</td>
+        <td>{{ match.opponent }}</td>
+        <td>
+            <form method="post" onsubmit="return checkAdminPassword();">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <button type="submit" class="danger">삭제</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>등록된 경기가 없습니다.</p>
+{% endif %}
+
+
+<!-- ✅ 여기에 JS 추가 -->
+<script>
+function checkAdminPassword() {
+    const pw = prompt("관리자 비밀번호를 입력하세요");
+    if (pw !== "1233") {
+        alert("비밀번호가 올바르지 않습니다.");
+        return false;
+    }
+    return true;
+}
+</script>
+
+
+{% endblock %}
+
+

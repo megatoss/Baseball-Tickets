@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Baseball Ticket</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header style="border-bottom: 10px solid #ccc; padding: 100px;">
+    <a href="/">메인</a> |
+    <a href="/admin">관리자</a> |
+    <a href="/apply">티켓 신청</a> |
+    <a href="/applications">신청 기록</a> |
+    <a href="/dashboard">대시보드</a>
+</header>
+
+<main style="padding: 20px;">
+    {% block content %}
+    {% endblock %}
+</main>
+
+</body>
+</html>

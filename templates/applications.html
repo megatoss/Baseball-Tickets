@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% if match_id %}
+<p>
+    <a href="/applications">전체 신청 보기</a>
+</p>
+{% endif %}
+
+{% block content %}
+<h1>신청 기록</h1>
+
+<div style="text-align: right; margin-bottom: 10px;">
+    <a href="/applications/download">
+        <button class="select">CSV 다운로드</button>
+    </a>
+</div>
+
+
+{% if applications %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th class="col-gray">경기일자</th>
+        <th class="col-gray">상대</th>
+        <th class="col-gray">좌석</th>
+        <th class="col-gray">이름</th>
+        <th class="col-gray">소속</th>
+        <th class="col-gray">관리</t
+    </tr>
+    {% for app in applications %}
+    <tr>
+        <td>{{ app.date }}</td>
+        <td>{{ app.opponent }}</td>
+        <td class="
+            {% if app.seat == 'Blue' %}seat-blue
+            {% elif app.seat == 'Red' %}seat-red
+            {% elif app.seat == 'Navy' %}seat-navy
+            {% endif %}
+        ">
+            {{ app.seat }}
+        </td>
+        <td>{{ app.name }}</td>
+        <td>{{ app.organization }}</td>
+        <td>
+            <form method="post" action="/applications/delete" onsubmit="return checkCancelPassword();">
+                <input type="hidden" name="application_id" value="{{ app.id }}">
+                <button type="submit" class="danger">취소</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>신청 기록이 없습니다.</p>
+{% endif %}
+
+
+
+<script>
+function checkCancelPassword() {
+    const pw = prompt("취소 비밀번호를 입력하세요");
+    if (pw !== "1233") {
+        alert("비밀번호가 올바르지 않습니다.");
+        return false;
+    }
+    return true;
+}
+</script>
+
+
+
+{% endblock %}

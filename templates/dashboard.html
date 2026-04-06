@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>신청 대시보드</h1>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th class="col-date">경기일자</th>
+        <th class="col-opponent">상대</th>
+        <th class="col-blue">Blue</th>
+        <th class="col-red">Red</th>
+        <th class="col-navy">Navy</th>
+    </tr>
+
+    {% for row in dashboard_data %}
+    <tr>
+        <td>{{ row.date }}</td>
+        <td>{{ row.opponent }}</td>
+        <td>
+            <a href="/applications?match_id={{ row.id }}&seat=Blue">
+                {{ row.Blue }}
+            </a>
+        </td>
+        <td>
+            <a href="/applications?match_id={{ row.id }}&seat=Red">
+                {{ row.Red }}
+            </a>
+        </td>
+        <td>
+            <a href="/applications?match_id={{ row.id }}&seat=Navy">
+                {{ row.Navy }}
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

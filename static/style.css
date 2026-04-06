@@ -1,0 +1,168 @@
+
+/* 공통 초기화 */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+}
+
+/* 상단 네비게이션 */
+header {
+    background-color: #b71c1c; /* 진한 레드 */
+    padding: 12px 24px;
+}
+
+header a {
+    color: #fff;
+    text-decoration: none;
+    margin-right: 18px;
+    font-weight: 600;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+/* 본문 레이아웃 */
+main {
+    padding: 24px;
+}
+
+/* 테이블 공통 */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #fff;
+}
+
+th {
+    background-color: #d32f2f;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+/* 행 hover */
+tr:hover {
+    background-color: #fbe9e7;
+}
+
+/* 버튼 */
+button {
+    background-color: #e53935;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #c62828;
+}
+
+/* 취소/삭제 계열 버튼 */
+button.danger {
+    background-color: #424242;
+}
+
+button.danger:hover {
+    background-color: #212121;
+}
+
+/* 팝업 영역 */
+#popup {
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* 대시보드 컬럼 헤더 색상 */
+th.col-date,
+th.col-opponent {
+    background-color: #eeeeee;
+    color: #333;
+}
+
+th.col-blue {
+    background-color: #1976d2;
+    color: #fff;
+}
+
+th.col-red {
+    background-color: #d32f2f;
+    color: #fff;
+}
+
+th.col-navy {
+    background-color: #0d1b2a;
+    color: #fff;
+}
+
+/* 신청 버튼 (검은 배경) */
+button.select {
+    background-color: #000;
+    color: #fff;
+}
+
+button.select:hover {
+    background-color: #333;
+}
+
+/* 신청기록 좌석 표시 */
+.seat-blue {
+    background-color: #1976d2;
+    color: #fff;
+    font-weight: 600;
+}
+
+.seat-red {
+    background-color: #d32f2f;
+    color: #fff;
+    font-weight: 600;
+}
+
+.seat-navy {
+    background-color: #0d1b2a;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 신청기록 테이블 컬럼 헤더 전체 그레이 */
+th.col-gray {
+    background-color: #eeeeee;
+    color: #000;
+    font-weight: 600;
+}
+
+/* ===== 테이블 전체 크기 축소 ===== */
+
+/* 테이블 기본 글자 크기 */
+table {
+    font-size: 12px;
+}
+
+/* 헤더 셀 */
+th {
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+/* 데이터 셀 */
+td {
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+/* 테이블 내 버튼도 함께 축소 */
+table button {
+    font-size: 12px;
+    padding: 4px 10px;
+}
