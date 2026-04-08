@@ -2,29 +2,26 @@
 {% block content %}
 
 <h1>티켓 신청</h1>
+
+<div style="margin-bottom: 12px;">
+    <form method="post" action="/admin/toggle-restriction"
+          onsubmit="return openAdminModal();">
+        <input type="hidden" name="password" id="admin-password-hidden">
+
+        <button type="submit" class="select-btn">
+            {% if restriction_enabled %}
+                신청제한
+            {% else %}
+                신청제한 해제
+            {% endif %}
+        </button>
+    </form>
+</div>
+
 <p>
     블루 1석, 레드 1석, 네이비 1석 신청 가능합니다.<br>
     동일 날짜는 1회만 신청 가능합니다.
 </p>
-
-<!-- ===== 중복 신청 팝업 ===== -->
-<div id="duplicate-popup-overlay" class="popup-overlay" style="display:none;">
-    <div class="popup-modal">
-        <div class="popup-header">
-            <span>신청 불가</span>
-            <button class="popup-close" onclick="closeDuplicatePopup()">×</button>
-        </div>
-
-        <div class="popup-body">
-            <p><strong>{{ error_message }}</strong></p>
-        </div>
-
-        <div class="popup-footer">
-            <button class="popup-btn" onclick="closeDuplicatePopup()">확인</button>
-        </div>
-    </div>
-</div>
-
 
 {% if matches %}
 <table border="1" cellpadding="8" class="apply-table">
@@ -44,7 +41,7 @@
         {% for seat in ["Blue", "Red", "Navy"] %}
         <td>
             <form method="post"
-                  onsubmit="return openApplyPopup(this,'{{ match.date }}','{{ match.opponent }}','{{ seat }}');">
+                  onsubmit="return openApplyModal(this,'{{ match.date }}','{{ match.opponent }}','{{ seat }}');">
                 <input type="hidden" name="match_id" value="{{ match.id }}">
                 <input type="hidden" name="seat" value="{{ seat }}">
                 <input type="hidden" name="name">
@@ -60,155 +57,178 @@
 <p>등록된 경기가 없습니다.</p>
 {% endif %}
 
-<!-- ===== 신청 확인 팝업 ===== -->
-<div id="apply-popup-overlay" class="popup-overlay" style="display:none;">
+{% if error_message %}
+<span id="server-error-message" style="display:none;">
+    {{ error_message }}
+</span>
+{% endif %}
+
+<!-- ===== 공통 모달 ===== -->
+<div id="common-modal-overlay" class="popup-overlay" style="display:none;">
     <div class="popup-modal">
         <div class="popup-header">
-            <span>티켓 신청</span>
-            <button class="popup-close" onclick="closeApplyPopup()">×</button>
+            <span id="common-modal-title"></span>
+            <button class="popup-close" onclick="closeCommonModal()">×</button>
         </div>
 
         <div class="popup-body">
-            <p id="apply-popup-info"></p>
+            <p id="common-modal-message"></p>
 
-            <label>
-                이름
-                <input type="text" id="popup-name">
-            </label>
+            <div id="common-modal-input-area" style="display:none; margin-top:12px;">
+                <div id="apply-input-area" style="display:none;">
+                    <label>
+                        이름
+                        <input type="text" id="modal-name">
+                    </label>
+                    <label>
+                        소속
+                        <input type="text" id="modal-org">
+                    </label>
+                </div>
 
-            <label>
-                소속
-                <input type="text" id="popup-org" onkeydown="handleEnter(event)">
-            </label>
+                <div id="admin-input-area" style="display:none;">
+                    <input type="password"
+                           id="modal-admin-password"
+                           placeholder="관리자 비밀번호 입력">
+                </div>
+            </div>
         </div>
 
         <div class="popup-footer">
-            <button type="button" class="popup-btn gray" onclick="closeApplyPopup()">취소</button>
-            <button type="button" class="popup-btn" onclick="submitApplyForm()">신청</button>
-        </div>
-    </div>
-</div>
+            <button class="popup-btn gray"
+                    id="common-modal-cancel-btn"
+                    onclick="closeCommonModal()">
+                취소
+            </button>
 
-<!-- ===== 신청 완료 팝업 ===== -->
-<div id="success-popup-overlay" class="popup-overlay" style="display:none;">
-    <div class="popup-modal">
-        <div class="popup-header">
-            <span>신청 완료</span>
-        </div>
-
-        <div class="popup-body">
-            <p><strong>신청이 완료되었습니다.</strong></p>
-        </div>
-
-        <div class="popup-footer">
-            <button class="popup-btn" onclick="closeSuccessPopup()">확인</button>
+            <button class="popup-btn"
+                    id="common-modal-confirm-btn">
+                확인
+            </button>
         </div>
     </div>
 </div>
 
 <script>
+let currentAction = null;
 let currentForm = null;
 
-function openApplyPopup(form, date, opponent, seat) {
+function openCommonModal({ title, message, mode, onConfirm, showCancel = true }) {
+    document.getElementById("common-modal-title").innerText = title;
+    document.getElementById("common-modal-message").innerHTML = message;
+
+    document.getElementById("common-modal-input-area").style.display = "none";
+    document.getElementById("apply-input-area").style.display = "none";
+    document.getElementById("admin-input-area").style.display = "none";
+
+    if (mode === "apply") {
+        document.getElementById("common-modal-input-area").style.display = "block";
+        document.getElementById("apply-input-area").style.display = "block";
+        document.getElementById("modal-name").value = "";
+        document.getElementById("modal-org").value = "";
+        document.getElementById("modal-name").focus();
+    }
+
+    if (mode === "admin") {
+        document.getElementById("common-modal-input-area").style.display = "block";
+        document.getElementById("admin-input-area").style.display = "block";
+        document.getElementById("modal-admin-password").value = "";
+        document.getElementById("modal-admin-password").focus();
+    }
+
+    document.getElementById("common-modal-cancel-btn").style.display =
+        showCancel ? "inline-block" : "none";
+
+    document.getElementById("common-modal-confirm-btn").onclick = onConfirm;
+
+    document.getElementById("common-modal-overlay").style.display = "flex";
+    currentAction = onConfirm;
+}
+
+function closeCommonModal() {
+    document.getElementById("common-modal-overlay").style.display = "none";
+    currentAction = null;
+}
+
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" && currentAction) {
+        event.preventDefault();
+        currentAction();
+    }
+});
+
+function openApplyModal(form, date, opponent, seat) {
     currentForm = form;
-    document.getElementById("apply-popup-info").innerHTML =
-        `${date} / ${opponent}<br><strong>${seat}</strong> 좌석을 신청합니다.`;
-    document.getElementById("popup-name").value = "";
-    document.getElementById("popup-org").value = "";
-    document.getElementById("apply-popup-overlay").style.display = "flex";
+    openCommonModal({
+        title: "티켓 신청",
+        message: `${date} / ${opponent}<br><strong>${seat}</strong> 좌석을 신청합니다.`,
+        mode: "apply",
+        onConfirm: submitApply
+    });
     return false;
 }
 
-function closeApplyPopup() {
-    document.getElementById("apply-popup-overlay").style.display = "none";
-    currentForm = null;
-}
-
-function submitApplyForm() {
-    const name = document.getElementById("popup-name").value.trim();
-    const org = document.getElementById("popup-org").value.trim();
-
+function submitApply() {
+    const name = document.getElementById("modal-name").value.trim();
+    const org = document.getElementById("modal-org").value.trim();
     if (!name || !org) {
         alert("이름과 소속을 모두 입력해 주세요.");
         return;
     }
-
-    currentForm.querySelector('input[name="name"]').value = name;
-    currentForm.querySelector('input[name="organization"]').value = org;
+    currentForm.querySelector("input[name='name']").value = name;
+    currentForm.querySelector("input[name='organization']").value = org;
     currentForm.submit();
 }
 
-/* ===== 신청 완료 팝업 ===== */
-function closeSuccessPopup() {
-    document.getElementById("success-popup-overlay").style.display = "none";
-    // URL ?success=1 제거
-    history.replaceState(null, "", location.pathname);
+function showSuccessModal() {
+    openCommonModal({
+        title: "신청 완료",
+        message: "<strong>신청이 완료되었습니다.</strong>",
+        mode: "success",
+        showCancel: false,
+        onConfirm: () => {
+            closeCommonModal();
+            history.replaceState(null, "", location.pathname);
+        }
+    });
 }
 
-/* success 파라미터 감지 */
-document.addEventListener("DOMContentLoaded", () => {
+function showDuplicateModal(message) {
+    openCommonModal({
+        title: "신청 불가",
+        message: `<strong>${message}</strong>`,
+        mode: "duplicate",
+        showCancel: false,
+        onConfirm: closeCommonModal
+    });
+}
+
+function openAdminModal() {
+    openCommonModal({
+        title: "관리자 확인",
+        message: "신청제한 상태를 변경하려면 비밀번호를 입력하세요.",
+        mode: "admin",
+        onConfirm: submitAdminToggle
+    });
+    return false;
+}
+
+function submitAdminToggle() {
+    document.getElementById("admin-password-hidden").value =
+        document.getElementById("modal-admin-password").value;
+    document.querySelector("form[action='/admin/toggle-restriction']").submit();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "1") {
-        document.getElementById("success-popup-overlay").style.display = "flex";
+        showSuccessModal();
+    }
+    const dup = document.getElementById("server-error-message");
+    if (dup) {
+        showDuplicateModal(dup.innerText);
     }
 });
 </script>
-
-
-<script>
-function closeDuplicatePopup() {
-    document.getElementById("duplicate-popup-overlay").style.display = "none";
-}
-
-/* ✅ 중복 신청 에러 발생 시 자동 팝업 */
-document.addEventListener("DOMContentLoaded", () => {
-    {% if error_message %}
-    document.getElementById("duplicate-popup-overlay").style.display = "flex";
-    {% endif %}
-});
-</script>
-
-
-<script>
-function handleEnter(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();  // 기본 동작 막기
-        submitApplyForm();       // 신청 처리
-    }
-}
-</script>
-
-<script>
-// ✅ 신청 완료 팝업 - Enter 키로 닫기
-document.addEventListener("keydown", function (event) {
-    const successPopup = document.getElementById("success-popup-overlay");
-
-    if (
-        successPopup &&
-        successPopup.style.display === "flex" &&
-        event.key === "Enter"
-    ) {
-        event.preventDefault();
-        closeSuccessPopup();
-    }
-});
-</script>
-
-<script>
-// ✅ 중복 신청 팝업 - Enter 키로 닫기
-document.addEventListener("keydown", function (event) {
-    const duplicatePopup = document.getElementById("duplicate-popup-overlay");
-
-    if (
-        duplicatePopup &&
-        duplicatePopup.style.display === "flex" &&
-        event.key === "Enter"
-    ) {
-        event.preventDefault();
-        closeDuplicatePopup();
-    }
-});
-</script>
-
 
 {% endblock %}
